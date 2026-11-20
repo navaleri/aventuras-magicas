@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#7c5cff">
+  <title>Aventuras Mágicas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <!-- App instalable (PWA): Android "Instalar app", iPad/iPhone "Añadir a pantalla de inicio" -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Aventuras">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <!-- Seguridad: solo se cargan recursos propios del juego -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================ MENÚ ============================ -->
+  <section id="screen-menu" class="screen active">
+    <button class="icon-btn settings-btn" id="btn-settings" aria-label="Ajustes para padres">⚙️</button>
+    <div class="logo">🗺️✨</div>
+    <h1>Aventuras Mágicas</h1>
+    <p class="subtitle">¡Tú decides el camino!</p>
+    <div class="worlds" id="worlds"></div>
+  </section>
+
+  <!-- ============================ JUEGO ============================ -->
+  <section id="screen-game" class="screen">
+    <div class="topbar">
+      <button class="btn btn-chip" id="btn-home" aria-label="Volver al menú">🏠 <span class="hide-sm">Menú</span></button>
+      <div class="inventory" id="inventory" aria-label="Tu mochila"></div>
+      <button class="btn btn-chip" id="btn-map" aria-label="Ver el mapa">🗺️ <span class="hide-sm">Mapa</span></button>
+    </div>
+
+    <div class="card scene-card" id="scene-card">
+      <div class="chapter" id="chapter"></div>
+
+      <div class="scene-main">
+        <div class="scene-emoji" id="scene-emoji"></div>
+
+        <div class="sentence-row">
+          <div class="sentences">
+            <p class="sentence" id="scene-text" lang="en"></p>
+            <p class="extra" id="scene-extra" lang="en"></p>
+            <p class="translation" id="scene-es" hidden></p>
+          </div>
+          <div class="side-btns">
+            <button class="btn speak-btn" id="btn-speak" aria-label="Escuchar en inglés">🔊</button>
+            <button class="btn tr-btn" id="btn-translate" aria-label="Ver traducción">ES</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="scene-side">
+        <div class="quiz" id="quiz">
+          <p class="question" id="quiz-q"></p>
+          <div class="options" id="quiz-options"></div>
+        </div>
+        <p class="feedback" id="feedback"></p>
+        <div class="choices" id="choices"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FINAL ============================ -->
+  <section id="screen-ending" class="screen">
+    <div class="card ending-card">
+      <div class="new-badge" id="ending-new">✨ ¡Nuevo final! ✨</div>
+      <div class="ending-emoji" id="ending-emoji"></div>
+      <h1 id="ending-title"></h1>
+      <div class="sentence-row center">
+        <p class="sentence" id="ending-text" lang="en"></p>
+        <button class="btn speak-btn" id="btn-ending-speak" aria-label="Escuchar en inglés">🔊</button>
+      </div>
+      <p class="translation" id="ending-es"></p>
+      <div class="ending-count" id="ending-count"></div>
+      <div class="ending-actions">
+        <button class="btn btn-green" id="btn-replay">🔄 Otra aventura</button>
+        <button class="btn" id="btn-ending-map">🗺️ Mi mapa</button>
+        <button class="btn btn-white" id="btn-ending-menu">🏠 Menú</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ MAPA ============================ -->
+  <section id="screen-map" class="screen screen-dark">
+    <div class="topbar">
+      <button class="btn btn-chip" id="btn-map-back">⬅️ Volver</button>
+      <h2 class="map-title" id="map-title"></h2>
+      <span></span>
+    </div>
+    <div class="map-stats" id="map-stats"></div>
+    <div class="map-box"><svg id="map-svg" role="img" aria-label="Mapa de caminos"></svg></div>
+    <h3 class="endings-head">🏅 Colección de finales</h3>
+    <div class="endings-grid" id="endings-grid"></div>
+  </section>
+
+  <!-- ===================== VENTANA: CONTROL PARENTAL ===================== -->
+  <div class="modal-bg" id="gate-modal" role="dialog" aria-modal="true">
+    <div class="modal" id="gate-content"></div>
+  </div>
+
+  <!-- ===================== VENTANA: AJUSTES (PADRES) ===================== -->
+  <div class="modal-bg" id="settings-modal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h2>⚙️ Ajustes para padres</h2>
+      <label class="toggle"><input type="checkbox" id="set-audio"><span>🔊 Leer en voz alta al entrar en cada escena</span></label>
+      <label class="toggle"><input type="checkbox" id="set-translation"><span>🇪🇸 Mostrar siempre la traducción</span></label>
+      <label class="toggle"><input type="checkbox" id="set-quizzes"><span>❓ Preguntas de comprensión</span></label>
+      <button class="btn btn-red btn-block" id="btn-reset">🗑️ Borrar el progreso</button>
+      <button class="btn btn-block" id="btn-settings-close">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Orden de carga: datos y motor primero, interfaz al final -->
+  <script src="js/storage.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/billing.js"></script>
+  <script src="stories/world1.js"></script>
+  <script src="stories/world2.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>

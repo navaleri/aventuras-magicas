@@ -1,0 +1,8 @@
+{
+  "appId": "com.aventurasmagicas.app",
+  "appName": "Aventuras Mágicas",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
